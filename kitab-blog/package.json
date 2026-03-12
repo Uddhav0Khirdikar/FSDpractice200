@@ -1,0 +1,77 @@
+{
+  "name": "kitab",
+  "version": "0.1.0",
+  "description": "A multilingual blog starter with full RTL/LTR support, built with Noor UI",
+  "homepage": "https://kitab.noorui.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ositaka/kitab--noorui-blog-starter"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > lib/supabase/types.generated.ts",
+    "db:seed": "npx tsx scripts/seed-posts.ts",
+    "upload:images": "npx tsx scripts/upload-images.ts",
+    "upload:images:gallery": "npx tsx scripts/upload-gallery-images.ts",
+    "update:image-urls": "npx tsx scripts/update-image-urls.ts",
+    "create:placeholders": "npx tsx scripts/create-placeholder-images.ts"
+  },
+  "dependencies": {
+    "@mdxeditor/editor": "^3.50.0",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.84.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.0.0",
+    "lucide-react": "^0.554.0",
+    "next": "^16.0.7",
+    "next-mdx-remote": "^5.0.0",
+    "next-themes": "^0.2.1",
+    "nextjs-toploader": "^3.9.17",
+    "noorui-rtl": "^0.4.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "rehype-pretty-code": "^0.14.1",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "shiki": "^3.15.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.5",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.2.6",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.0",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^16.0.3",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "blog",
+    "rtl",
+    "ltr",
+    "bidirectional",
+    "arabic",
+    "urdu",
+    "multilingual",
+    "next.js",
+    "supabase",
+    "noor-ui"
+  ],
+  "author": {
+    "name": "Nuno Marques",
+    "url": "https://ositaka.com",
+    "email": "info@ositaka.com"
+  },
+  "license": "MIT"
+}
