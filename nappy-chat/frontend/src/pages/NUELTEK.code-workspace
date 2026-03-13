@@ -1,0 +1,58 @@
+{
+  "folders": [
+    {
+      "name": "nappy-chat",
+      "path": "../../.."
+    },
+    {
+      "name": "subscription-tracker",
+      "path": "../../../../subscription-tracker"
+    },
+    {
+      "name": "kuch",
+      "path": "../../../../kuch"
+    },
+    {
+      "name": "KuchAPI",
+      "path": "../../../../KuchAPI"
+    },
+    {
+      "name": "nuel-portfolio",
+      "path": "../../../../nuel-portfolio"
+    },
+    {
+      "name": "testjs",
+      "path": "../../../../testjs"
+    },
+    {
+      "name": "email_scrapper",
+      "path": "../../../../email_scrapper"
+    },
+    {
+      "name": "nextjs-chat_project",
+      "path": "../../../../nextjs-chat_project"
+    },
+    {
+      "name": "HTML5+Practice+Template+Starter",
+      "path": "../../../../../Downloads/HTML5+Practice+Template+Starter"
+    },
+    {
+      "name": "socialmedia-project",
+      "path": "../../../../socialmedia-project"
+    },
+    {
+      "name": "53. Responsive Media Query",
+      "path": "../../../../../Downloads/53.+Responsive+Media+Query/53. Responsive Media Query"
+    },
+    {
+      "name": "simplestore",
+      "path": "../../../../simplestore"
+    },
+    {
+      "path": "../../../../my-extension"
+    }
+  ],
+  "settings": {
+    "liveServer.settings.multiRootWorkspaceName": "53. Responsive Media Query"
+  }
+}
