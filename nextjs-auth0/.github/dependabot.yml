@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    cooldown:
+      default-days: 5
+      semver-minor-days: 5
+      semver-patch-days: 3
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    cooldown:
+      default-days: 5
+      semver-major-days: 10
+      semver-minor-days: 5
+      semver-patch-days: 3

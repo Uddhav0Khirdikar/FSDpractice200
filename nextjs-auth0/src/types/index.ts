@@ -1,0 +1,250 @@
+import { AuthorizationParameters } from "./authorize.js";
+import { ConnectionTokenSet } from "./token-vault.js";
+
+export interface TokenSet {
+  accessToken: string;
+  idToken?: string;
+  scope?: string;
+  requestedScope?: string;
+  refreshToken?: string;
+  expiresAt: number; // the time at which the access token expires in seconds since epoch
+  audience?: string;
+  token_type?: string; // the type of the access token (e.g., "Bearer", "DPoP")
+}
+
+export interface AccessTokenSet {
+  accessToken: string;
+  scope?: string;
+  requestedScope?: string;
+  audience: string;
+  expiresAt: number; // the time at which the access token expires in seconds since epoch
+  token_type?: string; // the type of the access token (e.g., "Bearer", "DPoP")
+}
+
+export interface SessionData {
+  user: User;
+  tokenSet: TokenSet;
+  accessTokens?: AccessTokenSet[];
+  internal: {
+    // the session ID from the authorization server
+    sid: string;
+    // the time at which the session was created in seconds since epoch
+    createdAt: number;
+    // MCD metadata: domain and issuer used to authenticate this session
+    mcd?: import("./mcd.js").MCDMetadata;
+  };
+  connectionTokenSets?: ConnectionTokenSet[];
+  [key: string]: unknown;
+}
+
+/**
+ * Interface for a custom session data store.
+ *
+ * **TTL contract:** every successful write method (`set`, `update`) must reset the session
+ * TTL/expiry so that active sessions are not silently expired between requests.
+ */
+export interface SessionDataStore {
+  /**
+   * Gets the session from the store given a session ID.
+   */
+  get(id: string): Promise<SessionData | null>;
+
+  /**
+   * Upsert a session in the store given a session ID and `SessionData`.
+   */
+  set(id: string, session: SessionData): Promise<void>;
+
+  /**
+   * Optional: update the session by its ID only if it already exists.
+   * Return `true` if updated, `false` if not found.
+   *
+   */
+  update?(id: string, session: SessionData): Promise<boolean>;
+
+  /**
+   * Destroys the session with the given session ID.
+   */
+  delete(id: string): Promise<void>;
+
+  /**
+   * Deletes the session with the given logout token which may contain a session ID or a user ID, or both.
+   *
+   * **MCD resolver mode:** When using multiple custom domains with a domain resolver,
+   * implementations MUST filter on the `iss` field in addition to `sub`/`sid` to
+   * ensure sessions are only deleted for the matching issuer. Custom domains on the
+   * same tenant share signing keys, so failing to filter on `iss` allows a logout
+   * token from one domain to delete sessions created by a different domain.
+   */
+  deleteByLogoutToken?(logoutToken: LogoutToken): Promise<void>;
+}
+
+export type LogoutToken = { sub?: string; sid?: string; iss?: string };
+
+export interface User {
+  sub: string;
+  name?: string;
+  nickname?: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
+  email?: string;
+  email_verified?: boolean;
+  /**
+   * The organization ID that the user belongs to.
+   * This field is populated when the user logs in through an organization.
+   */
+  org_id?: string;
+
+  [key: string]: any;
+}
+
+export type {
+  Auth0ClientOptions,
+  PagesRouterRequest,
+  PagesRouterResponse
+} from "../server/client.js";
+
+export type {
+  BeforeSessionSavedHook,
+  OnCallbackHook,
+  RoutesOptions,
+  OnCallbackContext,
+  Routes
+} from "../server/auth-client.js";
+
+export type { TransactionCookieOptions } from "../server/transaction-store.js";
+
+export type {
+  SessionConfiguration,
+  SessionCookieOptions,
+  SessionStoreOptions
+} from "../server/session/abstract-session-store.js";
+
+export type {
+  CookieOptions,
+  ReadonlyRequestCookies
+} from "../server/cookies.js";
+
+export type {
+  TransactionStoreOptions,
+  TransactionState
+} from "../server/transaction-store.js";
+
+/**
+ * Logout strategy options for controlling logout endpoint selection.
+ */
+export type LogoutStrategy = "auto" | "oidc" | "v2";
+
+export interface BackchannelAuthenticationOptions {
+  /**
+   * Human-readable message to be displayed at the consumption device and authentication device.
+   * This allows the user to ensure the transaction initiated by the consumption device is the same that triggers the action on the authentication device.
+   */
+  bindingMessage: string;
+  /**
+   * The login hint to inform which user to use.
+   */
+  loginHint: {
+    /**
+     * The `sub` claim of the user that is trying to login using Client-Initiated Backchannel Authentication, and to which a push notification to authorize the login will be sent.
+     */
+    sub: string;
+  };
+  /**
+   * Set a custom expiry time for the CIBA flow in seconds. Defaults to 300 seconds (5 minutes) if not set.
+   */
+  requestedExpiry?: number;
+  /**
+   * Optional authorization details to use Rich Authorization Requests (RAR).
+   * @see https://auth0.com/docs/get-started/apis/configure-rich-authorization-requests
+   */
+  authorizationDetails?: AuthorizationDetails[];
+  /**
+   * Authorization Parameters to be sent with the authorization request.
+   */
+  authorizationParams?: AuthorizationParameters;
+}
+
+export interface BackchannelAuthenticationResponse {
+  tokenSet: TokenSet;
+  idTokenClaims?: { [key: string]: any };
+  authorizationDetails?: AuthorizationDetails[];
+}
+
+export interface AuthorizationDetails {
+  readonly type: string;
+  readonly [parameter: string]: unknown;
+}
+
+export type GetAccessTokenOptions = {
+  refresh?: boolean | null;
+  scope?: string | null;
+  /**
+   * Please note: If you are passing audience, ensure that the used audiences and scopes are
+   * part of the Application's Refresh Token Policies in Auth0 when configuring Multi-Resource Refresh Tokens (MRRT).
+   * {@link https://auth0.com/docs/secure/tokens/refresh-tokens/multi-resource-refresh-token|See Auth0 Documentation on Multi-resource Refresh Tokens}
+   */
+  audience?: string | null;
+  /**
+   * Control scope merging behavior.
+   * When true (default): merge global scopes for default audience.
+   * When false: use ONLY requested scope (no global merge).
+   * Used by challengeWithPopup() to prevent global scope pollution.
+   */
+  mergeScopes?: boolean;
+};
+
+export type ProxyOptions = {
+  proxyPath: string;
+  targetBaseUrl: string;
+  audience: string;
+  scope: string | null;
+};
+
+export {
+  AuthorizationParameters,
+  StartInteractiveLoginOptions
+} from "./authorize.js";
+export {
+  AccessTokenForConnectionOptions,
+  ConnectionTokenSet,
+  CustomTokenExchangeOptions,
+  CustomTokenExchangeResponse,
+  GRANT_TYPE_CUSTOM_TOKEN_EXCHANGE,
+  SUBJECT_TOKEN_TYPES
+} from "./token-vault.js";
+export { ConnectAccountOptions, RESPONSE_TYPES } from "./connected-accounts.js";
+export type { ChallengeWithPopupOptions } from "../client/mfa/index.js";
+export type { AccessTokenResponse } from "../client/helpers/get-access-token.js";
+export type { AuthCompleteMessage } from "../utils/popup-helpers.js";
+export {
+  MfaClient,
+  Authenticator,
+  ChallengeResponse,
+  EnrollmentResponse,
+  EnrollOptions,
+  EnrollOtpOptions,
+  EnrollOobOptions,
+  FactorType,
+  EnrollFactorTypeOtpOptions,
+  EnrollFactorTypeOobOptions,
+  MfaVerifyResponse,
+  VerifyMfaOptions,
+  VerifyMfaOptionsBase,
+  VerifyMfaWithOtpOptions,
+  VerifyMfaWithOobOptions,
+  VerifyMfaWithRecoveryCodeOptions,
+  MfaContext,
+  GRANT_TYPE_MFA_OTP,
+  GRANT_TYPE_MFA_OOB,
+  GRANT_TYPE_MFA_RECOVERY_CODE,
+  AuthenticatorApiResponse,
+  ChallengeApiResponse,
+  EnrollmentApiResponse
+} from "./mfa.js";
+
+export type {
+  DomainResolver,
+  DiscoveryCacheOptions,
+  MCDMetadata
+} from "./mcd.js";

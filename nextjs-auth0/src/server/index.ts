@@ -1,0 +1,47 @@
+export { Auth0Client } from "./client.js";
+
+export { TransactionStore } from "./transaction-store.js";
+
+export { AbstractSessionStore } from "./session/abstract-session-store.js";
+
+export { filterDefaultIdTokenClaims, DEFAULT_ID_TOKEN_CLAIMS } from "./user.js";
+
+// DPoP utilities
+export { generateDpopKeyPair } from "../utils/dpopRetry.js";
+
+// MFA error classes for handling MFA step-up authentication
+export {
+  MfaRequiredError,
+  MfaTokenExpiredError,
+  MfaTokenInvalidError
+} from "../errors/index.js";
+
+// MFA types for error handling
+export type { MfaRequirements } from "../errors/index.js";
+
+export {
+  GetServerSidePropsResultWithSession,
+  WithPageAuthRequired,
+  WithPageAuthRequiredPageRouterOptions,
+  WithPageAuthRequiredAppRouterOptions,
+  PageRoute,
+  AppRouterPageRouteOpts,
+  AppRouterPageRoute,
+  WithPageAuthRequiredPageRouter,
+  WithPageAuthRequiredAppRouter
+} from "./helpers/with-page-auth-required.js";
+
+// MCD (Multiple Custom Domains) public error classes
+export {
+  DomainResolutionError,
+  DomainValidationError,
+  IssuerValidationError,
+  SessionDomainMismatchError
+} from "../errors/mcd.js";
+
+// MCD types and utilities
+export type {
+  DomainResolver,
+  DiscoveryCacheOptions,
+  MCDMetadata
+} from "../types/mcd.js";
