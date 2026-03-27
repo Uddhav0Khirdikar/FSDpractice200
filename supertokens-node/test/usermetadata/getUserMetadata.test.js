@@ -1,0 +1,66 @@
+const assert = require("assert");
+
+const { printPath, createCoreApplication } = require("../utils");
+const STExpress = require("../../");
+const { ProcessState } = require("../../lib/build/processState");
+const UserMetadataRecipe = require("../../lib/build/recipe/usermetadata").default;
+const { Querier } = require("../../lib/build/querier");
+const { maxVersion } = require("../../lib/build/utils");
+
+describe(`getUserMetadataTest: ${printPath("[test/usermetadata/getUserMetadata.test.js]")}`, function () {
+    beforeEach(async function () {
+        ProcessState.getInstance().reset();
+    });
+
+    describe("getUserMetadata", () => {
+        it("should return an empty object for unknown userIds", async function () {
+            const connectionURI = await createCoreApplication();
+
+            const testUserId = "userId";
+
+            STExpress.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [UserMetadataRecipe.init()],
+            });
+
+            const result = await UserMetadataRecipe.getUserMetadata(testUserId);
+
+            assert.strictEqual(result.status, "OK");
+            assert.deepStrictEqual(result.metadata, {});
+        });
+
+        it("should return an object if it's created.", async function () {
+            const connectionURI = await createCoreApplication();
+
+            const testUserId = "userId";
+            const testMetadata = {
+                role: "admin",
+            };
+
+            STExpress.init({
+                supertokens: {
+                    connectionURI,
+                },
+                appInfo: {
+                    apiDomain: "api.supertokens.io",
+                    appName: "SuperTokens",
+                    websiteDomain: "supertokens.io",
+                },
+                recipeList: [UserMetadataRecipe.init()],
+            });
+            await UserMetadataRecipe.updateUserMetadata(testUserId, testMetadata);
+
+            const result = await UserMetadataRecipe.getUserMetadata(testUserId);
+
+            assert.strictEqual(result.status, "OK");
+            assert.deepStrictEqual(result.metadata, testMetadata);
+        });
+    });
+});

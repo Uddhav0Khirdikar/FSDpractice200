@@ -1,0 +1,92 @@
+let assert = require("assert");
+
+const { printPath, createCoreApplication } = require("../utils");
+let { ProcessState } = require("../../lib/build/processState");
+let STExpress = require("../../");
+const OpenIdRecipe = require("../../lib/build/recipe/openid/recipe").default;
+const OpenId = require("../../lib/build/recipe/openid");
+let { Querier } = require("../../lib/build/querier");
+const { maxVersion } = require("../../lib/build/utils");
+
+describe(`openIdTest: ${printPath("[test/openid/openid.test.js]")}`, function () {
+    beforeEach(async function () {
+        ProcessState.getInstance().reset();
+    });
+
+    it("Test that with default config discovery configuration is as expected", async function () {
+        const connectionURI = await createCoreApplication();
+        STExpress.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [OpenIdRecipe.init()],
+        });
+
+        let discoveryConfig = await OpenId.getOpenIdDiscoveryConfiguration();
+
+        assert.equal(discoveryConfig.issuer, "https://api.supertokens.io/auth");
+        assert.equal(discoveryConfig.jwks_uri, "https://api.supertokens.io/auth/jwt/jwks.json");
+    });
+
+    it("Test that with default config discovery configuration is as expected with api base path", async function () {
+        const connectionURI = await createCoreApplication();
+        STExpress.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                apiBasePath: "/",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [OpenIdRecipe.init()],
+        });
+
+        let discoveryConfig = await OpenId.getOpenIdDiscoveryConfiguration();
+
+        assert.equal(discoveryConfig.issuer, "https://api.supertokens.io");
+        assert.equal(discoveryConfig.jwks_uri, "https://api.supertokens.io/jwt/jwks.json");
+    });
+
+    it("Test that with default config discovery configuration is as expected with custom issuer", async function () {
+        const connectionURI = await createCoreApplication();
+        STExpress.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [
+                OpenIdRecipe.init({
+                    override: {
+                        functions: (originalImplementation) => ({
+                            ...originalImplementation,
+                            getOpenIdDiscoveryConfiguration: async (input) => {
+                                const orig = originalImplementation.getOpenIdDiscoveryConfiguration(input);
+                                return {
+                                    ...orig,
+                                    issuer: "https://cusomissuer/auth",
+                                    jwks_uri: "https://cusomissuer/auth/jwt/jwks.json",
+                                };
+                            },
+                        }),
+                    },
+                }),
+            ],
+        });
+
+        let discoveryConfig = await OpenId.getOpenIdDiscoveryConfiguration();
+
+        assert.equal(discoveryConfig.issuer, "https://cusomissuer/auth");
+        assert.equal(discoveryConfig.jwks_uri, "https://cusomissuer/auth/jwt/jwks.json");
+    });
+});

@@ -1,0 +1,2 @@
+# All build files are generated and can be ignored in diffs
+lib/build/**/* linguist-generated=true

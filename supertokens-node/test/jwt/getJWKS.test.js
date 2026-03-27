@@ -1,0 +1,264 @@
+let assert = require("assert");
+const express = require("express");
+const request = require("supertest");
+
+const { printPath, createCoreApplication } = require("../utils");
+let STExpress = require("../../");
+let { ProcessState } = require("../../lib/build/processState");
+let JWTRecipe = require("../../lib/build/recipe/jwt");
+let { Querier } = require("../../lib/build/querier");
+const { maxVersion } = require("../../lib/build/utils");
+let { middleware, errorHandler } = require("../../framework/express");
+
+describe(`getJWKS: ${printPath("[test/jwt/getJWKS.test.js]")}`, function () {
+    beforeEach(async function () {
+        ProcessState.getInstance().reset();
+    });
+
+    it("Test that default getJWKS api does not work when disabled", async function () {
+        const connectionURI = await createCoreApplication();
+        STExpress.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [
+                JWTRecipe.init({
+                    override: {
+                        apis: async (originalImplementation) => {
+                            return {
+                                ...originalImplementation,
+                                getJWKSGET: undefined,
+                            };
+                        },
+                    },
+                }),
+            ],
+        });
+
+        const app = express();
+
+        app.use(middleware());
+
+        app.use(errorHandler());
+
+        let response = await new Promise((resolve, reject) => {
+            request(app)
+                .get("/auth/jwt/jwks.json")
+                .end((err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
+
+        assert(response.status === 404);
+    });
+
+    it("Test that default getJWKS works fine", async function () {
+        const connectionURI = await createCoreApplication();
+        STExpress.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [JWTRecipe.init({})],
+        });
+
+        const app = express();
+
+        app.use(middleware());
+
+        app.use(errorHandler());
+
+        let { body: response, headers } = await new Promise((resolve, reject) => {
+            request(app)
+                .get("/auth/jwt/jwks.json")
+                .end((err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
+
+        assert(response !== undefined);
+        assert(Object.keys(response).length === 1);
+        assert(response.keys !== undefined);
+        assert(response.keys.length > 0);
+        const cacheControlHeaderParts = headers["cache-control"].split(", ");
+        assert.strictEqual(cacheControlHeaderParts.length, 2);
+        assert(cacheControlHeaderParts[0].startsWith("max-age=60"));
+        const maxAge = Number.parseInt(cacheControlHeaderParts[0].split("=")[1]);
+        assert(maxAge >= 60);
+        assert.strictEqual(cacheControlHeaderParts[1], "must-revalidate");
+    });
+
+    it("Test that we can override the Cache-Control header through the function", async function () {
+        const connectionURI = await createCoreApplication();
+        STExpress.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [
+                JWTRecipe.init({
+                    override: {
+                        functions: (oI) => ({
+                            ...oI,
+                            getJWKS: async (input) => {
+                                const res = await oI.getJWKS(input);
+                                return {
+                                    ...res,
+                                    validityInSeconds: 1234,
+                                };
+                            },
+                        }),
+                    },
+                }),
+            ],
+        });
+
+        const app = express();
+
+        app.use(middleware());
+
+        app.use(errorHandler());
+
+        let { body: response, headers } = await new Promise((resolve, reject) => {
+            request(app)
+                .get("/auth/jwt/jwks.json")
+                .end((err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
+
+        assert(response !== undefined);
+        assert(response.keys !== undefined);
+        assert(response.keys.length > 0);
+        assert.strictEqual(headers["cache-control"], "max-age=1234, must-revalidate");
+    });
+
+    it("Test that we can remove the Cache-Control header through the function", async function () {
+        const connectionURI = await createCoreApplication();
+        STExpress.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [
+                JWTRecipe.init({
+                    override: {
+                        functions: (oI) => ({
+                            ...oI,
+                            getJWKS: async (input) => {
+                                const res = await oI.getJWKS(input);
+                                return {
+                                    ...res,
+                                    validityInSeconds: undefined,
+                                };
+                            },
+                        }),
+                    },
+                }),
+            ],
+        });
+
+        const app = express();
+
+        app.use(middleware());
+
+        app.use(errorHandler());
+
+        let { body: response, headers } = await new Promise((resolve, reject) => {
+            request(app)
+                .get("/auth/jwt/jwks.json")
+                .end((err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
+
+        assert(response !== undefined);
+        assert(response.keys !== undefined);
+        assert(response.keys.length > 0);
+        assert.strictEqual(headers["cache-control"], undefined);
+    });
+
+    it("Test that we can override the Cache-Control header through the api", async function () {
+        const connectionURI = await createCoreApplication();
+        STExpress.init({
+            supertokens: {
+                connectionURI,
+            },
+            appInfo: {
+                apiDomain: "api.supertokens.io",
+                appName: "SuperTokens",
+                websiteDomain: "supertokens.io",
+            },
+            recipeList: [
+                JWTRecipe.init({
+                    override: {
+                        apis: (oI) => ({
+                            ...oI,
+                            getJWKSGET: async (input) => {
+                                const res = await oI.getJWKSGET(input);
+                                input.options.res.setHeader("Cache-Control", "asdf");
+                                return res;
+                            },
+                        }),
+                    },
+                }),
+            ],
+        });
+
+        const app = express();
+
+        app.use(middleware());
+
+        app.use(errorHandler());
+
+        let { body: response, headers } = await new Promise((resolve, reject) => {
+            request(app)
+                .get("/auth/jwt/jwks.json")
+                .end((err, res) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(res);
+                    }
+                });
+        });
+
+        assert(response !== undefined);
+        assert(response.keys !== undefined);
+        assert(response.keys.length > 0);
+        assert.strictEqual(headers["cache-control"], "asdf");
+    });
+});
