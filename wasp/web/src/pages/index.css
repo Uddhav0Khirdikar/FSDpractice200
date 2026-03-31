@@ -1,0 +1,32 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+div.twLandingPage {
+  background-color: #f7f5f0;
+  font-family: "IBM Plex Mono", monospace;
+  -webkit-font-smoothing: antialiased;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+pre code {
+  line-height: 1.25rem;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/*
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    color: white;
+    background: black;
+  }
+}
+*/

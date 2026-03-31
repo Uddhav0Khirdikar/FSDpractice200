@@ -1,0 +1,28 @@
+name: "Test - Starters"
+
+on:
+  workflow_call:
+
+env:
+  WASP_TELEMETRY_DISABLE: 1
+
+jobs:
+  test-starters:
+    name: Test starters
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: "actions/checkout@v6"
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+
+      - uses: ./.github/actions/install-wasp-cli-artifact
+
+      - name: Install node dependencies
+        working-directory: waspc/starters-e2e-tests
+        run: npm ci
+
+      - name: Run starters e2e tests
+        working-directory: waspc/starters-e2e-tests
+        run: npm run test:dev

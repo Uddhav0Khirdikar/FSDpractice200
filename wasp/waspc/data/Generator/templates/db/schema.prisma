@@ -1,0 +1,24 @@
+{{={= =}=}}
+
+{=& datasourceSchema =}
+
+{=# generatorSchemas =}
+{=& . =}
+{=/ generatorSchemas =}
+
+{=# modelSchemas =}
+{=& . =}
+
+{=/ modelSchemas =}
+{=# enumSchemas =}
+{=& . =}
+
+{=/ enumSchemas =}
+{=# viewSchemas =}
+{=& . =}
+
+{=/ viewSchemas =}
+{=# typeSchemas =}
+{=& . =}
+
+{=/ typeSchemas =}

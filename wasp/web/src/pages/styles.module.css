@@ -1,0 +1,99 @@
+.sectionSkewed {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  transform-origin: 100% 0;
+  transform: skewY(-2deg);
+  overflow: hidden;
+}
+
+.sectionSkewedContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.leftLights::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  width: 1223px;
+  height: 912px;
+
+  width: 1200px;
+  height: 912px;
+
+  left: calc(50% - 1100px);
+  top: -10%;
+
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 214, 0, 0.2) 0%,
+    rgba(255, 168, 0, 0) 100%
+  );
+  will-change: filter;
+  mix-blend-mode: normal;
+}
+
+.lightsTwo::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  width: 1223px;
+  height: 912px;
+
+  width: 1200px;
+  height: 912px;
+
+  left: calc(50%);
+  top: 0px;
+
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 214, 0, 0.2) 0%,
+    rgba(255, 168, 0, 0) 100%
+  );
+  will-change: filter;
+  mix-blend-mode: normal;
+}
+
+/* NOTE(matija): for some reason I couldn't get tailwind gradient to work when docusaurus build,
+ * so I resorted to doing it manually.
+ */
+.gradientBackground {
+  /* 75% purple with diagonal stripe pattern, 25% black */
+  background-image:
+    /* Stripes over purple portion */
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 0,
+      rgba(255, 255, 255, 0.15) 10px,
+      transparent 10px,
+      transparent 20px
+    ),
+    /* Stripes over black portion */
+      repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.08) 0,
+        rgba(255, 255, 255, 0.08) 10px,
+        transparent 10px,
+        transparent 20px
+      ),
+    /* Solid purple fill for the left portion */
+      linear-gradient(to right, #8b5cf6 0%, #8b5cf6 100%),
+    /* Black for the remaining portion */
+      linear-gradient(to right, #000000 0%, #000000 100%);
+  background-size:
+    75% 100%,
+    25% 100%,
+    75% 100%,
+    100% 100%;
+  background-repeat: no-repeat;
+  background-position:
+    left top,
+    right top,
+    left top,
+    left top;
+}
